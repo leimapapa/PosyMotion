@@ -8,7 +8,9 @@ interface VideoProcessorProps {
   sourceUrl: string | null;
   config: MotionConfig;
   isPlaying: boolean;
+  isRecording: boolean;
   videoRef: React.RefObject<HTMLVideoElement>;
+  onRecordingStopped: () => void;
 }
 
 const VideoProcessor: React.FC<VideoProcessorProps> = ({ 
@@ -16,7 +18,9 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
   sourceUrl, 
   config, 
   isPlaying,
-  videoRef 
+  isRecording,
+  videoRef,
+  onRecordingStopped
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +28,10 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
   // Buffer to store past frames
   const frameBuffer = useRef<ImageBitmap[]>([]);
   const requestRef = useRef<number>();
+  
+  // Recording references
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunks = useRef<Blob[]>([]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -35,8 +43,8 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
           const stream = await navigator.mediaDevices.getUserMedia({ 
             video: { 
               facingMode: 'environment',
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
+              width: { ideal: 1920 },
+              height: { ideal: 1080 }
             }, 
             audio: false 
           });
@@ -44,7 +52,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         } else if (sourceUrl) {
           video.srcObject = null;
           video.src = sourceUrl;
-          video.crossOrigin = 'anonymous'; // Critical for CORS
+          video.crossOrigin = 'anonymous'; 
         }
         video.play().catch(e => console.warn("Autoplay blocked", e));
       } catch (err: any) {
@@ -60,6 +68,58 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
       }
     };
   }, [sourceType, sourceUrl, videoRef]);
+
+  // Handle Recording Logic
+  useEffect(() => {
+    if (isRecording) {
+      startRecording();
+    } else {
+      stopRecording();
+    }
+  }, [isRecording]);
+
+  const startRecording = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    recordedChunks.current = [];
+    const stream = canvas.captureStream(30); // Capture at 30 FPS
+    
+    // Select supported mime type
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') 
+      ? 'video/webm;codecs=vp9' 
+      : 'video/webm';
+
+    const recorder = new MediaRecorder(stream, { mimeType });
+    
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) {
+        recordedChunks.current.push(e.data);
+      }
+    };
+
+    recorder.onstop = () => {
+      const blob = new Blob(recordedChunks.current, { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `posy-motion-${Date.now()}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      onRecordingStopped();
+    };
+
+    recorder.start();
+    mediaRecorderRef.current = recorder;
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+  };
 
   useEffect(() => {
     if (isPlaying) {
@@ -80,37 +140,30 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
-    // Adjust canvas size to match video aspect ratio while fitting screen
     if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
     }
 
     try {
-      // Capture current frame as ImageBitmap (efficient)
       const currentFrame = await createImageBitmap(video);
       
-      // Manage buffer
       frameBuffer.current.push(currentFrame);
       if (frameBuffer.current.length > MAX_DELAY_FRAMES + 1) {
         const removed = frameBuffer.current.shift();
-        removed?.close(); // Free memory
+        removed?.close();
       }
 
-      // 1. Draw the current frame as the base
       ctx.globalAlpha = 1.0;
       ctx.filter = 'none';
       ctx.drawImage(currentFrame, 0, 0);
 
-      // 2. Determine delayed frame
       const delayIndex = frameBuffer.current.length - 1 - config.delay;
       const delayedFrame = frameBuffer.current[delayIndex > 0 ? delayIndex : 0];
 
       if (delayedFrame) {
-        // 3. Apply Posy's Technique: Overlay Inverted Delayed Frame at 50% Opacity
         ctx.globalAlpha = config.opacity;
         
-        // Construct filter string
         let filterStr = '';
         if (config.invert) filterStr += 'invert(1) ';
         if (config.hueShift > 0) filterStr += `hue-rotate(${config.hueShift}deg) `;
@@ -122,7 +175,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         ctx.drawImage(delayedFrame, 0, 0);
       }
     } catch (e) {
-      // Ignore frame grab errors on first load
+      // Ignore
     }
 
     requestRef.current = requestAnimationFrame(processFrame);
@@ -132,11 +185,9 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     requestRef.current = requestAnimationFrame(processFrame);
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      // Clean up bitmaps
       frameBuffer.current.forEach(b => b.close());
       frameBuffer.current = [];
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config]);
 
   if (error) {

@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Camera, Upload, Link, Settings, RefreshCw, Play, Pause, Maximize } from 'lucide-react';
+import { Camera, Upload, Link, Settings, RefreshCw, Play, Pause, Maximize, Circle, Square } from 'lucide-react';
 import { VideoSourceType, MotionConfig } from './types';
 import { DEFAULT_CONFIG } from './constants';
 import VideoProcessor from './components/VideoProcessor';
@@ -13,7 +13,27 @@ const App: React.FC = () => {
   const [config, setConfig] = useState<MotionConfig>(DEFAULT_CONFIG);
   const [isPlaying, setIsPlaying] = useState(true);
   const [showControls, setShowControls] = useState(true);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Recording Timer
+  useEffect(() => {
+    let interval: number;
+    if (isRecording) {
+      setRecordingSeconds(0);
+      interval = window.setInterval(() => {
+        setRecordingSeconds(s => s + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const handleSourceSelect = (type: VideoSourceType, payload?: string | File) => {
     if (sourceUrl && sourceType !== 'camera') {
@@ -29,6 +49,7 @@ const App: React.FC = () => {
       setSourceUrl(null);
     }
     setIsPlaying(true);
+    setIsRecording(false);
   };
 
   const resetSource = () => {
@@ -37,6 +58,11 @@ const App: React.FC = () => {
     }
     setSourceType(null);
     setSourceUrl(null);
+    setIsRecording(false);
+  };
+
+  const toggleRecording = () => {
+    setIsRecording(prev => !prev);
   };
 
   return (
@@ -79,7 +105,9 @@ const App: React.FC = () => {
               sourceUrl={sourceUrl}
               config={config}
               isPlaying={isPlaying}
+              isRecording={isRecording}
               videoRef={videoRef}
+              onRecordingStopped={() => setIsRecording(false)}
             />
             
             {/* Overlay Play/Pause toggle on click */}
@@ -90,16 +118,36 @@ const App: React.FC = () => {
 
             {/* Floating Quick Action */}
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4 px-6 py-3 bg-black/50 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl">
+              {isRecording && (
+                <div className="flex items-center gap-2 px-2 animate-pulse mr-2">
+                   <div className="w-2 h-2 rounded-full bg-red-500" />
+                   <span className="text-xs font-mono text-red-500 font-bold">{formatTime(recordingSeconds)}</span>
+                </div>
+              )}
+              
               <button 
                 onClick={() => setIsPlaying(!isPlaying)}
-                className="hover:scale-110 transition-transform"
+                className="hover:scale-110 transition-transform p-1"
+                title={isPlaying ? "Pause" : "Play"}
               >
                 {isPlaying ? <Pause className="text-white w-6 h-6" /> : <Play className="text-white w-6 h-6 fill-white" />}
               </button>
+
               <div className="w-px h-6 bg-white/20" />
-              <div className="flex flex-col">
+
+              <button 
+                onClick={toggleRecording}
+                className={`hover:scale-110 transition-transform p-1 ${isRecording ? 'text-red-500' : 'text-white/60 hover:text-white'}`}
+                title={isRecording ? "Stop Recording" : "Start Recording"}
+              >
+                {isRecording ? <Square className="w-6 h-6 fill-red-500" /> : <Circle className="w-6 h-6" />}
+              </button>
+
+              <div className="w-px h-6 bg-white/20" />
+              
+              <div className="flex flex-col min-w-[60px]">
                 <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Delay</span>
-                <span className="text-sm font-mono text-blue-400">{config.delay} frames</span>
+                <span className="text-sm font-mono text-blue-400">{config.delay}f</span>
               </div>
             </div>
           </div>
@@ -116,7 +164,7 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* Status Bar (Hidden when UI collapsed) */}
+      {/* Status Bar */}
       {!sourceType && (
         <footer className="p-4 text-center text-zinc-500 text-xs tracking-wide">
           Inspired by Posy's Optic Delta exploration. Use time-delay to reveal motion.

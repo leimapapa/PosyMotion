@@ -1,0 +1,7 @@
+{
+  "name": "PosyMotion - Optical Delta Explorer",
+  "description": "A high-fidelity motion detection app inspired by Posy's inverted-overlay technique. Explore time-delays, color shifts, and optical deltas from your camera, local files, or web URLs.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

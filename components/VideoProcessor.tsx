@@ -40,7 +40,6 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     const setupSource = async () => {
       try {
         if (sourceType === 'camera') {
-          // Stop existing tracks before starting a new one
           if (video.srcObject) {
             (video.srcObject as MediaStream).getTracks().forEach(track => track.stop());
           }
@@ -74,7 +73,6 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     };
   }, [sourceType, sourceUrl, cameraFacingMode, videoRef]);
 
-  // Handle Recording Logic
   useEffect(() => {
     if (isRecording) {
       startRecording();
@@ -163,7 +161,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
       ctx.drawImage(currentFrame, 0, 0);
 
       const delayIndex = frameBuffer.current.length - 1 - config.delay;
-      const delayedFrame = frameBuffer.current[delayIndex > 0 ? delayIndex : 0];
+      const delayedFrame = frameBuffer.current[delayIndex >= 0 ? delayIndex : 0];
 
       if (delayedFrame) {
         ctx.globalAlpha = config.opacity;
@@ -175,7 +173,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         if (config.contrast !== 1) filterStr += `contrast(${config.contrast}) `;
         if (config.grayscale) filterStr += 'grayscale(1) ';
         
-        ctx.filter = filterStr || 'none';
+        ctx.filter = filterStr.trim() || 'none';
         ctx.drawImage(delayedFrame, 0, 0);
       }
     } catch (e) {
@@ -197,20 +195,20 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
   if (error) {
     return (
       <div className="p-8 text-center text-red-500 bg-red-500/10 rounded-xl border border-red-500/20 max-w-md mx-auto">
-        <h3 className="text-lg font-bold mb-2">Error</h3>
-        <p className="text-sm">{error}</p>
+        <h3 className="text-lg font-bold mb-2 uppercase tracking-tighter">System Error</h3>
+        <p className="text-sm font-medium">{error}</p>
         <button 
           onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg font-bold"
+          className="mt-6 px-6 py-3 bg-red-600 text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-xl active:scale-95"
         >
-          Try Again
+          Reset Engine
         </button>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center p-2 md:p-4">
+    <div className="relative w-full h-full flex items-center justify-center">
       <video 
         ref={videoRef} 
         className="hidden" 
@@ -220,7 +218,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
       />
       <canvas 
         ref={canvasRef} 
-        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl bg-black"
+        className="max-w-full max-h-full object-contain shadow-2xl bg-black"
       />
     </div>
   );

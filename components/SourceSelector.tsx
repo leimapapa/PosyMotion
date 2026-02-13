@@ -22,82 +22,82 @@ const SourceSelector: React.FC<SourceSelectorProps> = ({ onSelect }) => {
   };
 
   return (
-    <div className="max-w-xl w-full px-6 flex flex-col gap-8">
-      <div className="text-center space-y-2">
-        <h2 className="text-4xl font-black text-white tracking-tighter">Choose Your Feed</h2>
-        <p className="text-zinc-400 text-lg">Select a source to start visualizing the optic delta.</p>
+    <div className="max-w-2xl w-full px-6 py-12 flex flex-col gap-8 md:gap-12 overflow-y-auto max-h-full">
+      <div className="text-center space-y-3">
+        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter leading-tight">CHOOSE YOUR FEED</h2>
+        <p className="text-zinc-500 text-base md:text-xl font-medium max-w-md mx-auto">Select a source to begin visualizing the optic delta flow.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* Camera Option */}
         <button 
           onClick={() => onSelect('camera')}
-          className="group p-6 bg-zinc-900 border border-white/5 rounded-3xl hover:border-blue-500/50 hover:bg-zinc-800/80 transition-all flex flex-col items-center gap-4"
+          className="group p-6 md:p-8 bg-zinc-900/50 backdrop-blur-md border border-white/5 rounded-[2rem] hover:border-blue-500/50 hover:bg-zinc-800/80 active:scale-95 transition-all flex flex-col items-center gap-5 shadow-xl"
         >
-          <div className="w-14 h-14 bg-blue-600/10 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:scale-110 transition-all duration-300">
-            <Camera className="w-7 h-7 text-blue-500 group-hover:text-white" />
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-600/10 rounded-3xl flex items-center justify-center group-hover:bg-blue-600 group-hover:scale-110 transition-all duration-500 shadow-inner shadow-blue-500/20">
+            <Camera className="w-8 h-8 md:w-10 md:h-10 text-blue-500 group-hover:text-white" />
           </div>
           <div className="text-center">
-            <span className="block text-white font-bold text-lg">Live Camera</span>
-            <span className="text-xs text-zinc-500">Real-time detection</span>
+            <span className="block text-white font-black text-lg md:text-xl tracking-tight">LIVE CAMERA</span>
+            <span className="text-[10px] md:text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1 block">Real-time Capture</span>
           </div>
         </button>
 
         {/* Local File Option */}
-        <label className="group p-6 bg-zinc-900 border border-white/5 rounded-3xl hover:border-blue-500/50 hover:bg-zinc-800/80 transition-all flex flex-col items-center gap-4 cursor-pointer">
+        <label className="group p-6 md:p-8 bg-zinc-900/50 backdrop-blur-md border border-white/5 rounded-[2rem] hover:border-emerald-500/50 hover:bg-zinc-800/80 active:scale-95 transition-all flex flex-col items-center gap-5 cursor-pointer shadow-xl">
           <input type="file" className="hidden" accept="video/*" onChange={handleFileChange} />
-          <div className="w-14 h-14 bg-emerald-600/10 rounded-2xl flex items-center justify-center group-hover:bg-emerald-600 group-hover:scale-110 transition-all duration-300">
-            <Upload className="w-7 h-7 text-emerald-500 group-hover:text-white" />
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-emerald-600/10 rounded-3xl flex items-center justify-center group-hover:bg-emerald-600 group-hover:scale-110 transition-all duration-500 shadow-inner shadow-emerald-500/20">
+            <Upload className="w-8 h-8 md:w-10 md:h-10 text-emerald-500 group-hover:text-white" />
           </div>
           <div className="text-center">
-            <span className="block text-white font-bold text-lg">Local Upload</span>
-            <span className="text-xs text-zinc-500">Browse your device</span>
+            <span className="block text-white font-black text-lg md:text-xl tracking-tight">LOCAL CLIP</span>
+            <span className="text-[10px] md:text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1 block">Browse Files</span>
           </div>
         </label>
 
         {/* URL Option */}
         <button 
           onClick={() => setShowUrlInput(!showUrlInput)}
-          className={`group p-6 bg-zinc-900 border rounded-3xl transition-all flex flex-col items-center gap-4 ${showUrlInput ? 'border-amber-500/50 bg-zinc-800/80' : 'border-white/5 hover:border-amber-500/50 hover:bg-zinc-800/80'}`}
+          className={`group p-6 md:p-8 bg-zinc-900/50 backdrop-blur-md border rounded-[2rem] transition-all active:scale-95 flex flex-col items-center gap-5 shadow-xl ${showUrlInput ? 'border-amber-500/50 bg-zinc-800/80' : 'border-white/5 hover:border-amber-500/50 hover:bg-zinc-800/80'}`}
         >
-          <div className="w-14 h-14 bg-amber-600/10 rounded-2xl flex items-center justify-center group-hover:bg-amber-600 group-hover:scale-110 transition-all duration-300">
-            <Globe className="w-7 h-7 text-amber-500 group-hover:text-white" />
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-amber-600/10 rounded-3xl flex items-center justify-center group-hover:bg-amber-600 group-hover:scale-110 transition-all duration-500 shadow-inner shadow-amber-500/20">
+            <Globe className="w-8 h-8 md:w-10 md:h-10 text-amber-500 group-hover:text-white" />
           </div>
           <div className="text-center">
-            <span className="block text-white font-bold text-lg">Network URL</span>
-            <span className="text-xs text-zinc-500">Stream from web</span>
+            <span className="block text-white font-black text-lg md:text-xl tracking-tight">REMOTE LINK</span>
+            <span className="text-[10px] md:text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1 block">Network Stream</span>
           </div>
         </button>
       </div>
 
       {showUrlInput && (
-        <form onSubmit={handleUrlSubmit} className="mt-4 animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="relative group">
+        <form onSubmit={handleUrlSubmit} className="mt-2 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="relative group max-w-lg mx-auto w-full">
             <input 
               type="url" 
-              placeholder="https://example.com/video.mp4" 
+              placeholder="https://example.com/motion.mp4" 
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
-              className="w-full bg-zinc-900/50 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-amber-500/50 transition-all pr-16"
+              className="w-full bg-zinc-900/80 backdrop-blur-sm border-2 border-white/5 rounded-3xl px-6 py-5 text-white focus:outline-none focus:border-amber-500/50 transition-all pr-16 text-sm font-medium"
               autoFocus
             />
             <button 
               type="submit"
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-3 bg-amber-600 hover:bg-amber-500 rounded-xl text-white transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-3.5 bg-amber-600 hover:bg-amber-500 rounded-2xl text-white transition-all shadow-lg active:scale-90"
             >
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-6 h-6" />
             </button>
           </div>
-          <p className="mt-3 text-[10px] text-zinc-500 text-center uppercase tracking-widest">
-            Note: Videos must support CORS or be from a public source
+          <p className="mt-4 text-[9px] md:text-[10px] text-zinc-600 text-center uppercase tracking-[0.2em] font-black">
+            Videos must support CORS for processing
           </p>
         </form>
       )}
 
       {/* Feature Pills */}
-      <div className="flex flex-wrap justify-center gap-2 mt-4">
-        {['50% Opacity Delta', 'Inverted Layers', 'Adjustable Frame Delay', 'Hardware Accelerated'].map(tag => (
-          <span key={tag} className="px-3 py-1 bg-white/5 border border-white/5 rounded-full text-[10px] font-bold text-zinc-500 uppercase">
+      <div className="flex flex-wrap justify-center gap-3 mt-4">
+        {['Inverted Layers', 'Time Shifting', 'Motion Trails', 'PWA Support'].map(tag => (
+          <span key={tag} className="px-4 py-1.5 bg-white/5 border border-white/5 rounded-full text-[9px] md:text-[10px] font-black text-zinc-500 uppercase tracking-widest shadow-sm">
             {tag}
           </span>
         ))}

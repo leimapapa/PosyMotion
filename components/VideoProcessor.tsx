@@ -26,6 +26,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   
   const frameBuffer = useRef<ImageBitmap[]>([]);
   const requestRef = useRef<number | null>(null);
@@ -148,6 +149,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     if (canvas.width !== vW || canvas.height !== vH) {
       canvas.width = vW;
       canvas.height = vH;
+      setDimensions({ width: vW, height: vH });
     }
 
     try {
@@ -211,7 +213,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
   }
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center overflow-hidden">
       <video 
         ref={videoRef} 
         className="hidden" 
@@ -219,11 +221,15 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         muted 
         loop 
       />
-      {/* Use object-contain to ensure the canvas fills the parent while respecting its intrinsic resolution aspect ratio */}
       <canvas 
         ref={canvasRef} 
-        className="block w-full h-full max-w-full max-h-full object-contain shadow-2xl bg-black"
-        style={{ imageRendering: 'auto' }}
+        className="block shadow-2xl bg-black max-w-full max-h-full"
+        style={{ 
+          width: 'auto', 
+          height: 'auto', 
+          aspectRatio: dimensions.width ? `${dimensions.width} / ${dimensions.height}` : 'auto',
+          imageRendering: 'auto'
+        }}
       />
     </div>
   );

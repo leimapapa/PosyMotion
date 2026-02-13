@@ -73,7 +73,7 @@ const App: React.FC = () => {
 
   return (
     <div className="relative h-screen w-screen bg-black flex flex-col overflow-hidden select-none">
-      {/* Header Overlay - High Z-Index and contrast */}
+      {/* Header Overlay */}
       <header className="absolute top-0 left-0 right-0 z-[60] p-4 flex justify-between items-center bg-gradient-to-b from-black/95 via-black/40 to-transparent pointer-events-none">
         <div className="flex items-center gap-2 pointer-events-auto">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-900/60">
@@ -112,14 +112,13 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 relative bg-black overflow-hidden flex flex-col">
+      <main className="flex-1 relative bg-black flex flex-col overflow-hidden">
         {!sourceType ? (
           <div className="flex-1 overflow-y-auto flex items-center justify-center pt-24 pb-12">
             <SourceSelector onSelect={handleSourceSelect} />
           </div>
         ) : (
-          <div className="flex-1 relative flex items-center justify-center w-full h-full overflow-hidden">
-            {/* The Video Processor uses object-contain to maximize visible area within parent flex container */}
+          <div className="flex-1 relative flex items-center justify-center overflow-hidden">
             <VideoProcessor 
               sourceType={sourceType}
               sourceUrl={sourceUrl}
@@ -145,8 +144,8 @@ const App: React.FC = () => {
               </div>
             )}
 
-            {/* Floating Action Menu - Positioned safely above standard mobile navigation */}
-            <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 z-50 flex items-center gap-5 px-7 py-4 bg-zinc-900/95 backdrop-blur-3xl border border-white/20 rounded-full shadow-[0_15px_60px_rgba(0,0,0,0.9)] transition-all duration-300 ${showControls ? 'translate-y-40 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+            {/* Floating Action Menu - Positioned higher to clear mobile safe zones better */}
+            <div className={`absolute bottom-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-5 px-7 py-4 bg-zinc-900/95 backdrop-blur-3xl border border-white/20 rounded-full shadow-[0_15px_60px_rgba(0,0,0,0.9)] transition-all duration-300 ${showControls ? 'translate-y-48 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
               
               <button 
                 onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }}

@@ -111,15 +111,15 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 relative flex items-center justify-center bg-black overflow-hidden">
+      {/* Main Content Area */}
+      <main className="flex-1 relative bg-black overflow-hidden flex flex-col">
         {!sourceType ? (
-          <div className="w-full h-full overflow-y-auto flex items-center justify-center pt-24 pb-12">
+          <div className="flex-1 overflow-y-auto flex items-center justify-center pt-24 pb-12">
             <SourceSelector onSelect={handleSourceSelect} />
           </div>
         ) : (
-          <div className="w-full h-full relative flex items-center justify-center">
-            {/* The Video Processor ensures internal canvas dimensions match source and uses object-contain CSS */}
+          <div className="flex-1 relative flex items-center justify-center w-full h-full overflow-hidden">
+            {/* The Video Processor uses object-contain to maximize visible area within parent flex container */}
             <VideoProcessor 
               sourceType={sourceType}
               sourceUrl={sourceUrl}
@@ -139,13 +139,13 @@ const App: React.FC = () => {
 
             {/* Recording Timer Overlay */}
             {isRecording && (
-              <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-5 py-2.5 bg-red-600 backdrop-blur-2xl rounded-full shadow-2xl border border-white/20 animate-pulse">
+              <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-5 py-2.5 bg-red-600 backdrop-blur-2xl rounded-full shadow-2xl border border-white/20 animate-pulse">
                  <div className="w-2.5 h-2.5 rounded-full bg-white shadow-sm" />
                  <span className="text-sm font-mono text-white font-black tabular-nums">{formatTime(recordingSeconds)}</span>
               </div>
             )}
 
-            {/* Bottom Controls Overlay - elevated for mobile gesture navigation areas */}
+            {/* Floating Action Menu - Positioned safely above standard mobile navigation */}
             <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 z-50 flex items-center gap-5 px-7 py-4 bg-zinc-900/95 backdrop-blur-3xl border border-white/20 rounded-full shadow-[0_15px_60px_rgba(0,0,0,0.9)] transition-all duration-300 ${showControls ? 'translate-y-40 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
               
               <button 
@@ -177,7 +177,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Control Panel Drawer */}
+      {/* Control Drawer */}
       {sourceType && (
         <ControlPanel 
           config={config} 
@@ -187,7 +187,7 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* Footer Branding for landing */}
+      {/* Landing Footer */}
       {!sourceType && (
         <div className="absolute bottom-8 left-0 right-0 text-center pointer-events-none z-10">
           <p className="text-zinc-700 text-[10px] uppercase tracking-[0.5em] font-black drop-shadow-sm">

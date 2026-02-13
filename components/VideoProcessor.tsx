@@ -86,7 +86,6 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     if (!canvas) return;
 
     recordedChunks.current = [];
-    // Higher frame rate for smoother recording if possible
     const stream = canvas.captureStream(30); 
     
     const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') 
@@ -143,7 +142,6 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
-    // Use videoWidth and videoHeight as the source of truth for resolution
     const vW = video.videoWidth;
     const vH = video.videoHeight;
 
@@ -161,7 +159,6 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         removed?.close();
       }
 
-      // Draw current frame as base
       ctx.globalAlpha = 1.0;
       ctx.filter = 'none';
       ctx.drawImage(currentFrame, 0, 0);
@@ -183,7 +180,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         ctx.drawImage(delayedFrame, 0, 0);
       }
     } catch (e) {
-      // transient errors
+      // transient context issues
     }
 
     requestRef.current = requestAnimationFrame(processFrame);
@@ -214,7 +211,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
   }
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center p-4">
+    <div className="relative w-full h-full flex items-center justify-center">
       <video 
         ref={videoRef} 
         className="hidden" 
@@ -222,10 +219,10 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         muted 
         loop 
       />
-      {/* Explicitly control canvas size to prevent stretching in flex layouts */}
+      {/* Use object-contain to ensure the canvas fills the parent while respecting its intrinsic resolution aspect ratio */}
       <canvas 
         ref={canvasRef} 
-        className="block max-w-full max-h-full w-auto h-auto shadow-[0_0_100px_rgba(0,0,0,0.8)] bg-black rounded-sm"
+        className="block w-full h-full max-w-full max-h-full object-contain shadow-2xl bg-black"
         style={{ imageRendering: 'auto' }}
       />
     </div>

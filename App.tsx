@@ -118,7 +118,7 @@ const App: React.FC = () => {
             <SourceSelector onSelect={handleSourceSelect} />
           </div>
         ) : (
-          <div className="flex-1 relative flex items-center justify-center overflow-hidden">
+          <div className="flex-1 w-full h-full relative flex items-center justify-center bg-black">
             <VideoProcessor 
               sourceType={sourceType}
               sourceUrl={sourceUrl}
@@ -130,9 +130,9 @@ const App: React.FC = () => {
               onRecordingStopped={() => setIsRecording(false)}
             />
             
-            {/* Interaction Layer */}
+            {/* Interaction Layer (Click anywhere to play/pause) */}
             <div 
-              className="absolute inset-0 z-10" 
+              className="absolute inset-0 z-10 cursor-pointer" 
               onClick={() => setIsPlaying(!isPlaying)}
             />
 
@@ -144,7 +144,7 @@ const App: React.FC = () => {
               </div>
             )}
 
-            {/* Floating Action Menu - Positioned higher to clear mobile safe zones better */}
+            {/* Floating Action Menu - Positioned higher for mobile OS safe areas */}
             <div className={`absolute bottom-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-5 px-7 py-4 bg-zinc-900/95 backdrop-blur-3xl border border-white/20 rounded-full shadow-[0_15px_60px_rgba(0,0,0,0.9)] transition-all duration-300 ${showControls ? 'translate-y-48 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
               
               <button 

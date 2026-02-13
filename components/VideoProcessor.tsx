@@ -146,6 +146,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     const vW = video.videoWidth;
     const vH = video.videoHeight;
 
+    // Update internal buffer resolution and track for CSS aspect ratio
     if (canvas.width !== vW || canvas.height !== vH) {
       canvas.width = vW;
       canvas.height = vH;
@@ -163,7 +164,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
 
       ctx.globalAlpha = 1.0;
       ctx.filter = 'none';
-      ctx.drawImage(currentFrame, 0, 0);
+      ctx.drawImage(currentFrame, 0, 0, vW, vH);
 
       const delayIndex = frameBuffer.current.length - 1 - config.delay;
       const delayedFrame = frameBuffer.current[delayIndex >= 0 ? delayIndex : 0];
@@ -179,10 +180,10 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         if (config.grayscale) filterStr += 'grayscale(1) ';
         
         ctx.filter = filterStr.trim() || 'none';
-        ctx.drawImage(delayedFrame, 0, 0);
+        ctx.drawImage(delayedFrame, 0, 0, vW, vH);
       }
     } catch (e) {
-      // transient context issues
+      // transient frame processing error
     }
 
     requestRef.current = requestAnimationFrame(processFrame);
@@ -213,7 +214,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
   }
 
   return (
-    <div className="w-full h-full flex items-center justify-center overflow-hidden">
+    <div className="w-full h-full flex items-center justify-center bg-black overflow-hidden relative">
       <video 
         ref={videoRef} 
         className="hidden" 
@@ -221,14 +222,16 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         muted 
         loop 
       />
+      {/* 
+          Removing w-full h-full CSS classes to allow intrinsic attributes 
+          to determine shape. max-w-full max-h-full keeps it in view.
+      */}
       <canvas 
         ref={canvasRef} 
-        className="block shadow-2xl bg-black max-w-full max-h-full"
+        className="block shadow-[0_0_100px_rgba(0,0,0,0.8)] max-w-full max-h-full"
         style={{ 
-          width: 'auto', 
-          height: 'auto', 
-          aspectRatio: dimensions.width ? `${dimensions.width} / ${dimensions.height}` : 'auto',
-          imageRendering: 'auto'
+          imageRendering: 'auto',
+          aspectRatio: dimensions.width ? `${dimensions.width} / ${dimensions.height}` : 'auto'
         }}
       />
     </div>

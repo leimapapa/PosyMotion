@@ -86,6 +86,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     if (!canvas) return;
 
     recordedChunks.current = [];
+    // Higher frame rate for smoother recording if possible
     const stream = canvas.captureStream(30); 
     
     const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') 
@@ -142,10 +143,13 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
-    // Correctly update canvas resolution to match video source
-    if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+    // Use videoWidth and videoHeight as the source of truth for resolution
+    const vW = video.videoWidth;
+    const vH = video.videoHeight;
+
+    if (canvas.width !== vW || canvas.height !== vH) {
+      canvas.width = vW;
+      canvas.height = vH;
     }
 
     try {
@@ -179,7 +183,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         ctx.drawImage(delayedFrame, 0, 0);
       }
     } catch (e) {
-      // Catch transient errors (e.g. video context not ready)
+      // transient errors
     }
 
     requestRef.current = requestAnimationFrame(processFrame);
@@ -210,7 +214,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
   }
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center p-2">
+    <div className="relative w-full h-full flex items-center justify-center p-4">
       <video 
         ref={videoRef} 
         className="hidden" 
@@ -218,9 +222,11 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         muted 
         loop 
       />
+      {/* Explicitly control canvas size to prevent stretching in flex layouts */}
       <canvas 
         ref={canvasRef} 
-        className="max-w-full max-h-full object-contain shadow-[0_0_100px_rgba(0,0,0,0.8)] bg-black"
+        className="block max-w-full max-h-full w-auto h-auto shadow-[0_0_100px_rgba(0,0,0,0.8)] bg-black rounded-sm"
+        style={{ imageRendering: 'auto' }}
       />
     </div>
   );

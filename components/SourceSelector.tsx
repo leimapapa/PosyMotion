@@ -39,7 +39,7 @@ const SourceSelector: React.FC<SourceSelectorProps> = ({ onSelect }) => {
           </div>
           <div className="text-center">
             <span className="block text-white font-black text-lg md:text-xl tracking-tight uppercase">Live Camera</span>
-            <span className="text-[10px] md:text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1 block">Real-time Feed</span>
+            <span className="text-[10px] md:text-xs text-zinc-400 font-bold uppercase tracking-widest mt-1 block">Real-time Feed</span>
           </div>
         </button>
 
@@ -51,7 +51,7 @@ const SourceSelector: React.FC<SourceSelectorProps> = ({ onSelect }) => {
           </div>
           <div className="text-center">
             <span className="block text-white font-black text-lg md:text-xl tracking-tight uppercase">Local Clip</span>
-            <span className="text-[10px] md:text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1 block">Upload File</span>
+            <span className="text-[10px] md:text-xs text-zinc-400 font-bold uppercase tracking-widest mt-1 block">Upload File</span>
           </div>
         </label>
 
@@ -65,7 +65,7 @@ const SourceSelector: React.FC<SourceSelectorProps> = ({ onSelect }) => {
           </div>
           <div className="text-center">
             <span className="block text-white font-black text-lg md:text-xl tracking-tight uppercase">Video Link</span>
-            <span className="text-[10px] md:text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1 block">Video URL</span>
+            <span className="text-[10px] md:text-xs text-zinc-400 font-bold uppercase tracking-widest mt-1 block">Video URL</span>
           </div>
         </button>
       </div>

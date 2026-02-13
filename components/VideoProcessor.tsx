@@ -58,7 +58,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
           video.src = sourceUrl;
           video.crossOrigin = 'anonymous'; 
         }
-        video.play().catch(e => console.warn("Autoplay blocked", e));
+        video.play().catch(e => console.warn("Autoplay blocked or waiting for data", e));
       } catch (err: any) {
         setError(err.message || 'Failed to access video source');
       }
@@ -125,7 +125,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
 
   useEffect(() => {
     if (isPlaying) {
-      videoRef.current?.play();
+      videoRef.current?.play().catch(() => {});
     } else {
       videoRef.current?.pause();
     }
@@ -134,7 +134,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
   const processFrame = async () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas || video.paused || video.ended) {
+    if (!video || !canvas || video.paused || video.ended || video.readyState < 2) {
       requestRef.current = requestAnimationFrame(processFrame);
       return;
     }
@@ -142,6 +142,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
+    // Correctly update canvas resolution to match video source
     if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -156,6 +157,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         removed?.close();
       }
 
+      // Draw current frame as base
       ctx.globalAlpha = 1.0;
       ctx.filter = 'none';
       ctx.drawImage(currentFrame, 0, 0);
@@ -177,7 +179,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         ctx.drawImage(delayedFrame, 0, 0);
       }
     } catch (e) {
-      // Ignore errors for now
+      // Catch transient errors (e.g. video context not ready)
     }
 
     requestRef.current = requestAnimationFrame(processFrame);
@@ -194,21 +196,21 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
 
   if (error) {
     return (
-      <div className="p-8 text-center text-red-500 bg-red-500/10 rounded-xl border border-red-500/20 max-w-md mx-auto">
-        <h3 className="text-lg font-bold mb-2 uppercase tracking-tighter">System Error</h3>
-        <p className="text-sm font-medium">{error}</p>
+      <div className="p-8 text-center text-red-500 bg-red-500/10 rounded-3xl border border-red-500/20 max-w-md mx-auto">
+        <h3 className="text-lg font-black uppercase tracking-tighter mb-2">Engine Halt</h3>
+        <p className="text-sm font-bold text-red-400">{error}</p>
         <button 
           onClick={() => window.location.reload()}
-          className="mt-6 px-6 py-3 bg-red-600 text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-xl active:scale-95"
+          className="mt-6 px-8 py-3 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl active:scale-95 transition-all"
         >
-          Reset Engine
+          Reboot System
         </button>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
+    <div className="relative w-full h-full flex items-center justify-center p-2">
       <video 
         ref={videoRef} 
         className="hidden" 
@@ -218,7 +220,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
       />
       <canvas 
         ref={canvasRef} 
-        className="max-w-full max-h-full object-contain shadow-2xl bg-black"
+        className="max-w-full max-h-full object-contain shadow-[0_0_100px_rgba(0,0,0,0.8)] bg-black"
       />
     </div>
   );

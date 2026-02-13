@@ -6,6 +6,7 @@ import { MAX_DELAY_FRAMES } from '../constants';
 interface VideoProcessorProps {
   sourceType: VideoSourceType;
   sourceUrl: string | null;
+  cameraFacingMode: 'user' | 'environment';
   config: MotionConfig;
   isPlaying: boolean;
   isRecording: boolean;
@@ -16,6 +17,7 @@ interface VideoProcessorProps {
 const VideoProcessor: React.FC<VideoProcessorProps> = ({ 
   sourceType, 
   sourceUrl, 
+  cameraFacingMode,
   config, 
   isPlaying,
   isRecording,
@@ -25,12 +27,9 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
   
-  // Buffer to store past frames
   const frameBuffer = useRef<ImageBitmap[]>([]);
-  // Fix: Added null as initial value to satisfy the requirement for 1 argument in useRef
   const requestRef = useRef<number | null>(null);
   
-  // Recording references
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunks = useRef<Blob[]>([]);
 
@@ -41,9 +40,14 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     const setupSource = async () => {
       try {
         if (sourceType === 'camera') {
+          // Stop existing tracks before starting a new one
+          if (video.srcObject) {
+            (video.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+          }
+
           const stream = await navigator.mediaDevices.getUserMedia({ 
             video: { 
-              facingMode: 'environment',
+              facingMode: cameraFacingMode,
               width: { ideal: 1920 },
               height: { ideal: 1080 }
             }, 
@@ -68,7 +72,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         (video.srcObject as MediaStream).getTracks().forEach(track => track.stop());
       }
     };
-  }, [sourceType, sourceUrl, videoRef]);
+  }, [sourceType, sourceUrl, cameraFacingMode, videoRef]);
 
   // Handle Recording Logic
   useEffect(() => {
@@ -84,9 +88,8 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
     if (!canvas) return;
 
     recordedChunks.current = [];
-    const stream = canvas.captureStream(30); // Capture at 30 FPS
+    const stream = canvas.captureStream(30); 
     
-    // Select supported mime type
     const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') 
       ? 'video/webm;codecs=vp9' 
       : 'video/webm';
@@ -176,7 +179,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
         ctx.drawImage(delayedFrame, 0, 0);
       }
     } catch (e) {
-      // Ignore
+      // Ignore errors for now
     }
 
     requestRef.current = requestAnimationFrame(processFrame);
@@ -207,7 +210,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
   }
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center p-4">
+    <div className="relative w-full h-full flex items-center justify-center p-2 md:p-4">
       <video 
         ref={videoRef} 
         className="hidden" 

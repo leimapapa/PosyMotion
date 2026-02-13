@@ -27,7 +27,8 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({
   
   // Buffer to store past frames
   const frameBuffer = useRef<ImageBitmap[]>([]);
-  const requestRef = useRef<number>();
+  // Fix: Added null as initial value to satisfy the requirement for 1 argument in useRef
+  const requestRef = useRef<number | null>(null);
   
   // Recording references
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
